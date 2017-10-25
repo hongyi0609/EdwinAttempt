@@ -2,6 +2,7 @@
 package com.edwin.attempt.aidl;
 
 import com.edwin.attempt.aidl.Book;
+import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 // Declare any non-default types here with import statements
 
 interface IBookManager {
@@ -11,4 +12,6 @@ interface IBookManager {
      */
     List<Book> getBookList();
     void addBook(in Book book);
+    void registerListener(IOnNewBookArrivedListener listener);
+    void unregisterListener(IOnNewBookArrivedListener listener);
 }
