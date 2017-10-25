@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">EdwinAttempt</string>
+    <string name="aidl_request">请求服务数据</string>
 </resources>
