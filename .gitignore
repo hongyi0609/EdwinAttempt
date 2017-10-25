@@ -1,0 +1,16 @@
+.DS_Store
+**/build
+**/bin
+**/gen
+#**/local.properties
+**/.idea
+**/*.iml
+**/captures
+.gradle/**
+**/.bugtags.log
+#**/settings.gradle
+maven/*
+!/maven/nothing
+
+gradle/cache/*
+local.properties
