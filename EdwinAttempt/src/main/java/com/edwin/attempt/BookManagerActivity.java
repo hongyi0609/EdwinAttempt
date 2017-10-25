@@ -76,6 +76,9 @@ public class BookManagerActivity extends AppCompatActivity {
         }
     };
 
+    /**
+     * 运行在客户端的Binder线程池，服务端（BookManagerService）在主线程调用该接口会阻塞，记得开辟新的线程
+     * */
     private IOnNewBookArrivedListener mOnNewBookArrivedListener = new IOnNewBookArrivedListener.Stub() {
         @Override
         public void onNewBookArrived(Book newBook) throws RemoteException {
