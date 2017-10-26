@@ -1,4 +1,4 @@
-package com.edwin.attempt.aidl;
+package com.edwin.attempt_1;
 
 import android.app.Service;
 import android.content.Intent;
@@ -9,6 +9,10 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
 import android.util.Log;
+
+import com.edwin.attempt.aidl.Book;
+import com.edwin.attempt.aidl.IBookManager;
+import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -79,6 +83,7 @@ public class BookManagerService extends Service {
     private class ServiceWorker implements Runnable {
         @Override
         public void run() {
+            Log.d(TAG, "mIsServiceDestroyed = " + mIsServiceDestroyed);
             while (!mIsServiceDestroyed.get()) {
                 try {
                     //添加一本新书/5s
