@@ -1,5 +1,6 @@
 package com.edwin.attempt;
 
+import android.annotation.SuppressLint;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -24,6 +25,11 @@ import com.edwin.attempt.aidl.IBookManager;
 import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by hongy_000 on 2017/10/25.
@@ -40,6 +46,7 @@ public class BookManagerActivity extends AppCompatActivity {
     private static final String ACCESS_BOOK_SERVICE = "com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE";
     private static final int ACCESS_BOOK_SERVICE_REQUEST_CODE = 1;
 
+    @SuppressLint("HandlerLeak")
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
@@ -76,36 +83,50 @@ public class BookManagerActivity extends AppCompatActivity {
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 
+    private static final ThreadFactory S_THREAD_FACTORY  = new ThreadFactory() {
+        @Override
+        public Thread newThread(@NonNull Runnable r) {
+            return new Thread(r, "ThreadName : " + Thread.currentThread().getName());
+        }
+    };
+
     private ServiceConnection mConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             final IBookManager bookManager = IBookManager.Stub.asInterface(service);
-                mRemoteBookManager = bookManager;
-                try {
-                    //为保证程序的健壮性, 使用Binder类的linkToDeath()方法对服务端进程意外停止时进行处理.
-                    //服务端进程停止时, IBinder.DeathRecipient mDeathRecipient对象的binderDied()方法会被回调.
-                    //也可选择在onServiceDisconnected()时处理服务端进程意外停止的情况， 区别是binderDied()方法在线程池中执行，而onServiceDisconnected()在UI线程执行, 选择一种处理方式即可.
-                    mRemoteBookManager.asBinder().linkToDeath(mDeathRecipient, 0);
-                } catch (RemoteException e) {
-                    e.printStackTrace();
-                }
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            List<Book> list = bookManager.getBookList();
-                            Log.i(TAG, "query book list, list type: " + list.getClass().getCanonicalName());
-                            Book newBook = new Book(3, "沧浪之水");
-                            bookManager.addBook(newBook);
-                            Log.i(TAG, "add Book " + newBook.toString());
-                            List<Book> newList = bookManager.getBookList();
-                            Log.i(TAG, "query Book list:" + newList.toString());
-                            bookManager.registerListener(mOnNewBookArrivedListener);
-                        } catch (RemoteException re) {
-                            re.printStackTrace();
-                        }
+            mRemoteBookManager = bookManager;
+            try {
+                //为保证程序的健壮性, 使用Binder类的linkToDeath()方法对服务端进程意外停止时进行处理.
+                //服务端进程停止时, IBinder.DeathRecipient mDeathRecipient对象的binderDied()方法会被回调.
+                //也可选择在onServiceDisconnected()时处理服务端进程意外停止的情况， 区别是binderDied()方法在线程池中执行，而onServiceDisconnected()在UI线程执行, 选择一种处理方式即可.
+                mRemoteBookManager.asBinder().linkToDeath(mDeathRecipient, 0);
+            } catch (RemoteException e) {
+                e.printStackTrace();
+            }
+
+            Runnable runnable = new Runnable() {
+                @Override
+                public void run() {
+                    try {
+                        List<Book> list = bookManager.getBookList();
+                        Log.i(TAG, "query book list, list type: " + list.getClass().getCanonicalName());
+                        Book newBook = new Book(3, "沧浪之水");
+                        bookManager.addBook(newBook);
+                        Log.i(TAG, "add Book " + newBook.toString());
+                        List<Book> newList = bookManager.getBookList();
+                        Log.i(TAG, "query Book list:" + newList.toString());
+                        bookManager.registerListener(mOnNewBookArrivedListener);
+                    } catch (RemoteException re) {
+                        re.printStackTrace();
                     }
-                }).start();
+                }
+            };
+            ExecutorService singleExecutorService = new ThreadPoolExecutor(
+                    1, 1,
+                    0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingDeque<Runnable>(1024), S_THREAD_FACTORY , new ThreadPoolExecutor.AbortPolicy());
+            singleExecutorService.execute(runnable);
+
         }
 
         @Override

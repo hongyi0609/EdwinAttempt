@@ -5,10 +5,10 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -18,9 +18,14 @@ import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
-
-import static android.os.Binder.getCallingUid;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by hongy_000 on 2017/10/25.
@@ -69,11 +74,11 @@ public class BookManagerService extends Service {
             mListenerList.unregister(listener);
         }
 
-        @Override
+/*        @Override
         public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
             // 通过onTransact()方法检查权限，既验证了权限又验证了包名。如果验证失败直接返回false，
             // 服务端不会终止执行AIDL中的方法，达到保护服务端的效果
-            /*int check = checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE);
+            int check = checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE);
             Log.e(TAG, "check = " + check);
             if (check == PackageManager.PERMISSION_DENIED) {
                 return false;
@@ -86,17 +91,34 @@ public class BookManagerService extends Service {
                 if (packageName != null && !packageName.startsWith("com.edwin")) {
                     return false;
                 }
-            }*/
+            }
             return super.onTransact(code, data, reply, flags);
+        }  */
+    };
+
+    private static final ThreadFactory S_THREAD_FACTORY = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+        @Override
+        public Thread newThread(@NonNull Runnable r) {
+            return new Thread(r, "Thread Number " + mCount.getAndIncrement());
         }
     };
+
+    private ExecutorService singleThreadPoolExecutor = new ThreadPoolExecutor(
+            1, 1,
+            0, TimeUnit.MILLISECONDS,
+            new LinkedBlockingDeque<Runnable>(1024), S_THREAD_FACTORY, new ThreadPoolExecutor.AbortPolicy());
 
     @Override
     public void onCreate() {
         super.onCreate();
         mBookList.add(new Book(1, "Android aidl first"));
         mBookList.add(new Book(2, "Android aidl second"));
-        new Thread(new ServiceWorker()).start();
+
+//        ExecutorService singleTaskThreadPool = Executors.newSingleThreadExecutor();
+//        singleTaskThreadPool.execute(new ServiceWorker());
+
+        singleThreadPoolExecutor.execute(new ServiceWorker());
     }
 
     @Nullable
@@ -114,13 +136,13 @@ public class BookManagerService extends Service {
      *  如果客户端是静态注册权限，可以选择在IBookManager.Stub#onTransact()方法中鉴权
      *  */
     private boolean hasPermission() {
-        int check = checkCallingOrSelfPermission("com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE");
+        int check = checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE);
         return check == PackageManager.PERMISSION_DENIED;
     }
 
     @Override
     public void onDestroy() {
-        mIsServiceDestroyed.set(true);
+        singleThreadPoolExecutor.shutdown();
         super.onDestroy();
     }
 
@@ -128,7 +150,7 @@ public class BookManagerService extends Service {
         @Override
         public void run() {
             Log.d(TAG, "mIsServiceDestroyed = " + mIsServiceDestroyed);
-            while (!mIsServiceDestroyed.get()) {
+            while (!singleThreadPoolExecutor.isShutdown()) {
                 try {
                     //添加一本新书/5s
                     Thread.sleep(5000);
