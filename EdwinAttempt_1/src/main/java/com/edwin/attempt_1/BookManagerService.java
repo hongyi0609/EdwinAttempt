@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.Parcel;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
@@ -18,6 +19,8 @@ import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import static android.os.Binder.getCallingUid;
 
 /**
  * Created by hongy_000 on 2017/10/25.
@@ -33,9 +36,15 @@ public class BookManagerService extends Service {
      * */
     private CopyOnWriteArrayList<Book> mBookList = new CopyOnWriteArrayList<>();
 
+    /**
+     * @serial {RemoteCallBackList}
+     * 用于跨进程通信，客户端可以通过该类型访问服务端数据
+     * */
     private RemoteCallbackList<IOnNewBookArrivedListener> mListenerList = new RemoteCallbackList<>();
 
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
+
+    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE";
 
     private Binder mBinder = new IBookManager.Stub(){
         @Override
@@ -59,6 +68,27 @@ public class BookManagerService extends Service {
         public void unregisterListener(IOnNewBookArrivedListener listener) throws RemoteException {
             mListenerList.unregister(listener);
         }
+
+        @Override
+        public boolean onTransact(int code, Parcel data, Parcel reply, int flags) throws RemoteException {
+            // 通过onTransact()方法检查权限，既验证了权限又验证了包名。如果验证失败直接返回false，
+            // 服务端不会终止执行AIDL中的方法，达到保护服务端的效果
+            /*int check = checkCallingOrSelfPermission(ACCESS_BOOK_SERVICE);
+            Log.e(TAG, "check = " + check);
+            if (check == PackageManager.PERMISSION_DENIED) {
+                return false;
+            }
+            String packageName;
+            String[] packages = getPackageManager().getPackagesForUid(getCallingUid());
+            Log.e(TAG, "packages = " + packages);
+            if (packages != null && packages.length > 0) {
+                packageName = packages[0];
+                if (packageName != null && !packageName.startsWith("com.edwin")) {
+                    return false;
+                }
+            }*/
+            return super.onTransact(code, data, reply, flags);
+        }
     };
 
     @Override
@@ -81,6 +111,7 @@ public class BookManagerService extends Service {
     /**
      *  check Permission
      *  @return whether has permission to access
+     *  如果客户端是静态注册权限，可以选择在IBookManager.Stub#onTransact()方法中鉴权
      *  */
     private boolean hasPermission() {
         int check = checkCallingOrSelfPermission("com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE");
