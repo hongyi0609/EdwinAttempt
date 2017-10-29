@@ -2,6 +2,7 @@ package com.edwin.attempt_1;
 
 import android.app.Service;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteCallbackList;
@@ -71,7 +72,19 @@ public class BookManagerService extends Service {
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
+        if (!hasPermission()) {
+            return null;
+        }
         return mBinder;
+    }
+
+    /**
+     *  check Permission
+     *  @return whether has permission to access
+     *  */
+    private boolean hasPermission() {
+        int check = checkCallingOrSelfPermission("com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE");
+        return check == PackageManager.PERMISSION_DENIED;
     }
 
     @Override

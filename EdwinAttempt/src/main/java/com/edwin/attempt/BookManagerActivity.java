@@ -2,14 +2,20 @@ package com.edwin.attempt;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.RemoteException;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -30,6 +36,9 @@ public class BookManagerActivity extends AppCompatActivity {
     private static final int MESSAGE_NEW_BOOK_ARRIVED = 1;
 
     private IBookManager mRemoteBookManager;
+
+    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE";
+    private static final int ACCESS_BOOK_SERVICE_REQUEST_CODE = 1;
 
     private Handler mHandler = new Handler(){
         @Override
@@ -121,9 +130,45 @@ public class BookManagerActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_book_manager);
-//        Intent intent = new Intent(this, BookManagerService.class);
-//        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
-        bindServiceAndRecipient();
+        if (ContextCompat.checkSelfPermission(this, ACCESS_BOOK_SERVICE) != PackageManager.PERMISSION_GRANTED) {
+            new AlertDialog.Builder(this)
+                    .setMessage(getString(R.string.access_book_permission))
+                    .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            ActivityCompat.requestPermissions(
+                                    BookManagerActivity.this,
+                                    new String[]{ACCESS_BOOK_SERVICE},
+                                    ACCESS_BOOK_SERVICE_REQUEST_CODE);
+                        }
+                    }).setCancelable(false).show();
+        } else {
+  //        Intent intent = new Intent(this, BookManagerService.class);
+  //        bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
+            bindServiceAndRecipient();
+        }
+
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == ACCESS_BOOK_SERVICE_REQUEST_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                bindServiceAndRecipient();
+            } else {
+                new AlertDialog.Builder(this).setMessage(getString(R.string.access_book_no_permission))
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(
+                                        BookManagerActivity.this,
+                                        new String[]{ACCESS_BOOK_SERVICE},
+                                        ACCESS_BOOK_SERVICE_REQUEST_CODE);
+                            }
+                        }).show();
+            }
+        }
     }
 
     @Override
