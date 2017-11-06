@@ -3,4 +3,7 @@
     <string name="aidl_request">请求服务数据</string>
     <string name="access_book_permission">请求访问图书服务权限</string>
     <string name="access_book_no_permission">没有访问图书服务权限！</string>
+    <string name="dynamic_proxy">动态代理</string>
+    <string name="dynamic_proxy_button">动态代理按钮</string>
+    <string name="static_proxy">静态代理</string>
 </resources>

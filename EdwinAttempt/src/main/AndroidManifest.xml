@@ -18,6 +18,7 @@
             </intent-filter>
         </activity>
         <activity android:name=".BookManagerActivity" />
+        <activity android:name=".ui.ProxyActivity" />
 
     </application>
 
