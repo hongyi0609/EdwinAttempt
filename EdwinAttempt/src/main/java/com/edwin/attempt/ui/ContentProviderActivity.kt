@@ -8,6 +8,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.View
 import android.widget.Button
+import com.edwin.attempt.BookManagerActivity
 import com.edwin.attempt.R
 
 /**
@@ -21,14 +22,18 @@ class ContentProviderActivity : AppCompatActivity(),View.OnClickListener {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.content_provider_layout)
-        findViewById<Button>(R.id.button_add_data).setOnClickListener(this)
+        findViewById<Button>(R.id.button_add_data).setOnClickListener(listener)
         findViewById<Button>(R.id.button_query_from_book).setOnClickListener(this)
         findViewById<Button>(R.id.button_btn_update_data).setOnClickListener(this)
-        findViewById<Button>(R.id.button_btn_delete_data).setOnClickListener(this)
+        findViewById<Button>(R.id.button_btn_delete_data).setOnClickListener{
+            val uri: Uri? = Uri.parse("content://com.edwin.attempt.database.provider/book/" +
+                    newId)
+            contentResolver.delete(uri,null,null)
+        }
     }
 
-    override fun onClick(v: View?) {
-        when (v?.id) {
+    private val listener = View.OnClickListener { v ->
+        when (v.id) {
             R.id.button_add_data -> {
                 val uri: Uri? = Uri.parse("content://com.edwin.attempt.database.provider/book")
                 val values: ContentValues? = ContentValues()
@@ -40,6 +45,12 @@ class ContentProviderActivity : AppCompatActivity(),View.OnClickListener {
                 val newUri: Uri? = contentResolver?.insert(uri, values)
                 newId = newUri?.pathSegments?.get(1)
             }
+//            else -> {
+//            }
+        }
+    }
+    override fun onClick(v: View?) {
+        when (v?.id) {
             R.id.button_query_from_book -> {
                 val uri: Uri? = Uri.parse("content://com.edwin.attempt.database.provider/book")
                 val cursor: Cursor? = contentResolver.query(uri, null, null, null, null)
@@ -65,11 +76,6 @@ class ContentProviderActivity : AppCompatActivity(),View.OnClickListener {
                 values?.put("pages", 1221)
                 values?.put("price", 124.25)
                 contentResolver?.update(uri, values, null, null)
-            }
-            R.id.button_btn_delete_data -> {
-                val uri: Uri? = Uri.parse("content://com.edwin.attempt.database.provider/book/" +
-                        newId)
-                contentResolver.delete(uri,null,null)
             }
         }
     }
