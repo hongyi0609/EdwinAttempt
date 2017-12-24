@@ -43,7 +43,7 @@ public class BookManagerActivity extends AppCompatActivity {
 
     private IBookManager mRemoteBookManager;
 
-    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE";
+    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attemptService.permission.ACCESS_BOOK_SERVICE";
     private static final int ACCESS_BOOK_SERVICE_REQUEST_CODE = 1;
 
     @SuppressLint("HandlerLeak")
@@ -79,7 +79,7 @@ public class BookManagerActivity extends AppCompatActivity {
 //        Intent intent = new Intent(BookManagerActivity.this, BookManagerService.class);
         Intent intent = new Intent();
         intent.setAction("com.edwin.attempt");
-        intent.setPackage("com.edwin.attempt_1");
+        intent.setPackage("com.edwin.attemptService");
         bindService(intent, mConnection, Context.BIND_AUTO_CREATE);
     }
 

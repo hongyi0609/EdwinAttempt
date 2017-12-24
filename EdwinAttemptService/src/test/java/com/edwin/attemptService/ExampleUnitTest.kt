@@ -1,4 +1,4 @@
-package com.edwin.attempt_1
+package com.edwin.attemptService
 
 import org.junit.Test
 

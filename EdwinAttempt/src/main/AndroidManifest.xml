@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.edwin.attempt">
 
-    <!--<uses-permission android:name="com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE" />-->
+    <!--<uses-permission android:attemptService.permission.ACCESS_BOOK_SERVICE" />-->
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -19,6 +19,7 @@
         </activity>
         <activity android:name=".BookManagerActivity" />
         <activity android:name=".ui.ProxyActivity" />
+        <activity android:name=".ui.ContentProviderActivity"/>
 
     </application>
 

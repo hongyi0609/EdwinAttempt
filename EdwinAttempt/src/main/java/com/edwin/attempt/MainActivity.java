@@ -6,6 +6,7 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 
+import com.edwin.attempt.ui.ContentProviderActivity;
 import com.edwin.attempt.ui.ProxyActivity;
 
 /**
@@ -21,21 +22,32 @@ public class MainActivity extends AppCompatActivity {
         buttonAidl.setOnClickListener(listener);
         Button buttonProxy = findViewById(R.id.proxy_btn);
         buttonProxy.setOnClickListener(listener);
+        findViewById(R.id.btn_provider).setOnClickListener(listener);
     }
 
     private View.OnClickListener listener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            Intent intent;
+
             switch (v.getId()) {
                 case R.id.aidl_btn:
-                    intent = new Intent(MainActivity.this, BookManagerActivity.class);
+                    startTargetActivity(BookManagerActivity.class);
+                    break;
+                case R.id.proxy_btn:
+                    startTargetActivity(ProxyActivity.class);
+                    break;
+                case R.id.btn_provider:
+                    startTargetActivity(ContentProviderActivity.class);
                     break;
                 default:
-                    intent = new Intent(MainActivity.this, ProxyActivity.class);
                     break;
             }
-            startActivity(intent);
         }
     };
+
+    private void startTargetActivity(Class<?> cls) {
+        Intent intent;
+        intent = new Intent(MainActivity.this, cls);
+        startActivity(intent);
+    }
 }

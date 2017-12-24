@@ -13,7 +13,7 @@ import com.edwin.attempt.proxy.StarProxy
  * Created by hongy_000 on 2017/11/6.
  * @author hongy_000
  */
-public class ProxyActivity : AppCompatActivity() {
+ class ProxyActivity : AppCompatActivity() {
     companion object {
         private val TAG = ProxyActivity::class.java.simpleName
     }

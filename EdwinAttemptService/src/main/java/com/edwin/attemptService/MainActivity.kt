@@ -1,8 +1,7 @@
-package com.edwin.attempt_1
+package com.edwin.attemptService
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.widget.Button
 
 class MainActivity : AppCompatActivity(){
 

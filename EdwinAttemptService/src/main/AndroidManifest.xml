@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.edwin.attempt_1">
+    package="com.edwin.attemptService">
 
     <permission
-        android:name="com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE"
+        android:name="com.edwin.attemptService.permission.ACCESS_BOOK_SERVICE"
         android:protectionLevel="normal" />
     <application
         android:allowBackup="true"
@@ -12,7 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name="com.edwin.attemptService.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,12 +20,17 @@
             </intent-filter>
         </activity>
 
-        <service android:name=".BookManagerService" >
+        <service android:name="com.edwin.attemptService.BookManagerService" >
             <intent-filter>
                 <action android:name="com.edwin.attempt" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
+
+        <provider
+            android:authorities="com.edwin.attempt.database.provider"
+            android:exported="true"
+            android:name="com.edwin.attemptService.provider.DatabaseProvider"/>
     </application>
 
 </manifest>

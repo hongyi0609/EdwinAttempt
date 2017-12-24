@@ -7,7 +7,7 @@ android {
 
 
     defaultConfig {
-        applicationId "com.edwin.attempt_1"
+        applicationId "com.edwin.attemptService"
         minSdkVersion 16
         targetSdkVersion 26
         versionCode 1

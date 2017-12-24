@@ -6,4 +6,9 @@
     <string name="dynamic_proxy">动态代理</string>
     <string name="dynamic_proxy_button">动态代理按钮</string>
     <string name="static_proxy">静态代理</string>
+    <string name="content_provider">ContentProvider测试</string>
+    <string name="add_to_book">Add To Book</string>
+    <string name="query_from_book">Query From Book</string>
+    <string name="update_data">Update Data</string>
+    <string name="delete_from_book">Delete From Book</string>
 </resources>

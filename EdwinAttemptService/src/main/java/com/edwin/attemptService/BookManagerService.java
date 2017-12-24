@@ -1,4 +1,4 @@
-package com.edwin.attempt_1;
+package com.edwin.attemptService;
 
 import android.app.Service;
 import android.content.Intent;
@@ -19,7 +19,6 @@ import com.edwin.attempt.aidl.IOnNewBookArrivedListener;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingDeque;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -49,7 +48,7 @@ public class BookManagerService extends Service {
 
     private AtomicBoolean mIsServiceDestroyed = new AtomicBoolean(false);
 
-    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attempt_1.permission.ACCESS_BOOK_SERVICE";
+    private static final String ACCESS_BOOK_SERVICE = "com.edwin.attemptService.permission.ACCESS_BOOK_SERVICE";
 
     private Binder mBinder = new IBookManager.Stub(){
         @Override
